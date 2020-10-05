@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 
 namespace SortedArraysMerger
 {
@@ -20,16 +21,6 @@ namespace SortedArraysMerger
             Print(MergeSortedArrays(sortedArrays));
         }
 
-        private static void Print(int[] sortedArray)
-        {
-            for (int i = 0; i < sortedArray.Length - 1; i++)
-            {
-                Console.Write(sortedArray[i] + ",");
-            }
-            Console.Write(sortedArray[sortedArray.Length - 1]);
-            Console.Write("\n\r");
-        }
-
         private static int[] MergeSortedArrays(int[,] sortedArrays)
         {
             if (sortedArrays == null || sortedArrays.Length == 0)
@@ -39,35 +30,50 @@ namespace SortedArraysMerger
 
             int[] mergedArray = new int[sortedArrays.Length];
             int lastInsertedIndex = 0;
-            int[] arrayIndexes = new int[sortedArrays.GetLength(0)];
-            while (lastInsertedIndex < sortedArrays.Length)
+            int K = sortedArrays.GetLength(0);
+            int N = sortedArrays.Length / K;
+            SortedList<int, Tuple<int, int>> sortedValuesWithLocation = FillSortedArray(sortedArrays);
+            while (sortedValuesWithLocation.Count > 0)
             {
-                int arrayIndexToInsertNext = GetMinimumLocationInArrays(sortedArrays, arrayIndexes);
-                mergedArray[lastInsertedIndex] = sortedArrays[arrayIndexToInsertNext, arrayIndexes[arrayIndexToInsertNext]];
-                arrayIndexes[arrayIndexToInsertNext] += 1;
+                KeyValuePair<int, Tuple<int, int>> minimumWithLocation = getMinimumWithLocation(sortedValuesWithLocation);
+                mergedArray[lastInsertedIndex] = minimumWithLocation.Key;
                 lastInsertedIndex++;
+                sortedValuesWithLocation.Remove(minimumWithLocation.Key);
+                if (minimumWithLocation.Value.Item2 < N - 1)
+                {
+                    sortedValuesWithLocation.Add(sortedArrays[minimumWithLocation.Value.Item1, minimumWithLocation.Value.Item2 + 1],
+                        new Tuple<int, int>(minimumWithLocation.Value.Item1, minimumWithLocation.Value.Item2 + 1));
+                }
             }
             return mergedArray;
         }
 
-        private static int GetMinimumLocationInArrays(int[,] sortedArrays, int[] arrayIndexes)
+        private static KeyValuePair<int, Tuple<int, int>> getMinimumWithLocation(SortedList<int, Tuple<int, int>> sortedValuesToIndex)
         {
-            int N = sortedArrays.Length / sortedArrays.GetLength(0);
-            int min = Int32.MaxValue;
-            int minLocationIndex = 0;
-            for (int i = 0; i < arrayIndexes.Length; i++)
+            var en = sortedValuesToIndex.GetEnumerator();
+            en.MoveNext();
+            var minimumWithLocation = en.Current;
+            return minimumWithLocation;
+        }
+
+        private static SortedList<int, Tuple<int, int>> FillSortedArray(int[,] sortedArrays)
+        {
+            var sortedValuesToIndex = new SortedList<int, Tuple<int, int>>();
+            for (int i = 0; i < sortedArrays.GetLength(0); i++)
             {
-                if (arrayIndexes[i] == N)
-                {
-                    continue;
-                }
-                if (sortedArrays[i, arrayIndexes[i]] < min)
-                {
-                    min = sortedArrays[i, arrayIndexes[i]];
-                    minLocationIndex = i;
-                }
+                sortedValuesToIndex.Add(sortedArrays[i, 0], new Tuple<int, int>(i, 0));
             }
-            return minLocationIndex;
+            return sortedValuesToIndex;
+        }
+
+        private static void Print(int[] sortedArray)
+        {
+            for (int i = 0; i < sortedArray.Length - 1; i++)
+            {
+                Console.Write(sortedArray[i] + ",");
+            }
+            Console.Write(sortedArray[sortedArray.Length - 1]);
+            Console.Write("\n\r");
         }
     }
 }
