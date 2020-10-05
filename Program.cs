@@ -41,11 +41,16 @@ namespace SortedArraysMerger
                 sortedValuesWithLocation.Remove(minimumWithLocation.Key);
                 if (minimumWithLocation.Value.Item2 < N - 1)
                 {
-                    sortedValuesWithLocation.Add(sortedArrays[minimumWithLocation.Value.Item1, minimumWithLocation.Value.Item2 + 1],
-                        new Tuple<int, int>(minimumWithLocation.Value.Item1, minimumWithLocation.Value.Item2 + 1));
+                    insertNextValueWithLocation(sortedValuesWithLocation, sortedArrays, minimumWithLocation.Value);
                 }
             }
             return mergedArray;
+        }
+
+        private static void insertNextValueWithLocation(SortedList<int, Tuple<int, int>> sortedValuesWithLocation, int[,] sortedArrays, Tuple<int, int> nextLocation)
+        {
+            sortedValuesWithLocation.Add(sortedArrays[nextLocation.Item1, nextLocation.Item2 + 1],
+                        new Tuple<int, int>(nextLocation.Item1, nextLocation.Item2 + 1));
         }
 
         private static KeyValuePair<int, Tuple<int, int>> getMinimumWithLocation(SortedList<int, Tuple<int, int>> sortedValuesToIndex)
